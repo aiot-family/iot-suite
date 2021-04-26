@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--<parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>1.5.8.RELEASE</version>
+        <relativePath/>
+    </parent>-->
+
+    <groupId>com.tuya</groupId>
+    <artifactId>iot-suit</artifactId>
+    <version>${iot.suit.version}</version>
+    <packaging>pom</packaging>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <iot.suit.version>1.0.0-SNAPSHOT</iot.suit.version>
+        <spring-boot.version>1.5.8.RELEASE</spring-boot.version>
+        <tuya.spring.boot.starter.version>1.0.1-R</tuya.spring.boot.starter.version>
+        <mapstruct.version>1.4.1.Final</mapstruct.version>
+        <lombok.version>1.18.18</lombok.version>
+        <swagger.version>2.4.0</swagger.version>
+        <fastjson.version>1.2.73</fastjson.version>
+        <caffeine.version>2.6.2</caffeine.version>
+    </properties>
+
+    <modules>
+        <module>iot-suit-core</module>
+        <module>iot-suit-ability</module>
+        <module>iot-suit-service</module>
+        <module>iot-suit-web</module>
+        <module>iot-suit-starter</module>
+    </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.session</groupId>
+            <artifactId>spring-session</artifactId>
+        </dependency>
+    </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.tuya</groupId>
+                <artifactId>iot-suit-core</artifactId>
+                <version>${iot.suit.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.tuya</groupId>
+                <artifactId>iot-suit-ability</artifactId>
+                <version>${iot.suit.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.tuya</groupId>
+                <artifactId>iot-suit-service</artifactId>
+                <version>${iot.suit.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.tuya</groupId>
+                <artifactId>iot-suit-web</artifactId>
+                <version>${iot.suit.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.tuya.iot.framework</groupId>
+                <artifactId>tuya-spring-boot-starter</artifactId>
+                <version>${tuya.spring.boot.starter.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>caffeine</artifactId>
+                <version>${caffeine.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct</artifactId>
+                <version>${mapstruct.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct-processor</artifactId>
+                <version>${mapstruct.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.googlecode.libphonenumber</groupId>
+                <artifactId>libphonenumber</artifactId>
+                <version>8.12.21</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.googlecode.libphonenumber</groupId>
+                <artifactId>geocoder</artifactId>
+                <version>2.157</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.googlecode.libphonenumber</groupId>
+                <artifactId>carrier</artifactId>
+                <version>1.147</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.googlecode.libphonenumber</groupId>
+                <artifactId>prefixmapper</artifactId>
+                <version>2.157</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-swagger-ui</artifactId>
+                <version>${swagger.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-swagger2</artifactId>
+                <version>${swagger.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>${fastjson.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.8.1</version>
+                    <configuration>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.mapstruct</groupId>
+                                <artifactId>mapstruct-processor</artifactId>
+                                <version>${mapstruct.version}</version>
+                            </path>
+                            <!-- other annotation processors -->
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
+                            </path>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok-mapstruct-binding</artifactId>
+                                <version>0.2.0</version>
+                            </path>
+                        </annotationProcessorPaths>
+
+                        <showWarnings>true</showWarnings>
+                        <showDeprecation>false</showDeprecation>
+                        <source>${maven.compiler.source}</source>
+                        <target>${maven.compiler.target}</target>
+                        <encoding>${project.build.sourceEncoding}</encoding>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>3.2.1</version>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>3.1.1</version>
+                    <configuration>
+                        <additionalOptions>
+                            <additionalOption>-Xdoclint:none</additionalOption>
+                        </additionalOptions>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>attach-javadocs</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+
+
+</project>
