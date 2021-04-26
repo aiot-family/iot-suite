@@ -38,13 +38,6 @@
         <module>iot-suit-starter</module>
     </modules>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.springframework.session</groupId>
-            <artifactId>spring-session</artifactId>
-        </dependency>
-    </dependencies>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
