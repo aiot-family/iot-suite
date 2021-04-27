@@ -1,16 +1,16 @@
 package com.tuya.iot.suit.ability.notification.model;
 
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
-import lombok.ToString;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @Description:
  * @auther: Medivh.chen@tuya.com
  * @date: 2021/04/14
  **/
-@Data
-@ToString
+@Setter
+@Getter
 public class BaseTemplateRequest {
 
     /**

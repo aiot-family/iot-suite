@@ -1,6 +1,9 @@
 package com.tuya.iot.suit.service.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -11,6 +14,9 @@ import java.util.List;
  * @since 2021/3/9
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class AssetDTO {
 
     /**
@@ -42,6 +48,11 @@ public class AssetDTO {
      * 子设备数量
      */
     private Integer child_device_count;
+
+    /**
+     * 层级号
+     */
+    private int level;
 
     /**
      * 子资产

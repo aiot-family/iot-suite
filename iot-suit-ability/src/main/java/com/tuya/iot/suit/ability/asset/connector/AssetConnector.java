@@ -6,6 +6,8 @@ import com.tuya.iot.openapi.model.PageResult;
 import com.tuya.iot.suit.ability.asset.ability.AssetAbility;
 import com.tuya.iot.suit.ability.asset.model.*;
 
+import java.util.List;
+
 /**
  * Description  TODO
  *
@@ -29,6 +31,10 @@ public interface AssetConnector extends AssetAbility {
     @Override
     @GET("/v1.0/iot-02/assets/{asset_id}")
     Asset selectAsset(@Path("asset_id") String assetId);
+
+    @Override
+    @GET("/v1.0/iot-02/assets")
+    List<Asset> selectAssets(@Query("asset_ids") String assetIds);
 
     @Override
     @GET("/v1.1/iot-02/assets")

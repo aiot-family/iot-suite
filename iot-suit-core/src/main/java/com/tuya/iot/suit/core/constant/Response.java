@@ -75,10 +75,6 @@ public class Response<T> implements Serializable {
         return buildFailure(errorCode.getCode(), errorCode.getMsg());
     }
 
-    public static Response buildFailure(String code) {
-        return buildFailure(code, "");
-    }
-
     public static Response buildFailure(String code, String msg) {
         Response resp = new Response();
         resp.success = false;

@@ -4,6 +4,8 @@ package com.tuya.iot.suit.ability.asset.ability;
 import com.tuya.iot.openapi.model.PageResult;
 import com.tuya.iot.suit.ability.asset.model.*;
 
+import java.util.List;
+
 /**
  * Description  TODO
  *
@@ -26,6 +28,15 @@ public interface AssetAbility {
      * @return
      */
     Asset selectAsset(String assetId);
+
+    /**
+     * 查询空间节点
+     * 根据id查询资产
+     *
+     * @param assetIds 资产id
+     * @return
+     */
+    List<Asset> selectAssets(String assetIds);
 
 
     /**

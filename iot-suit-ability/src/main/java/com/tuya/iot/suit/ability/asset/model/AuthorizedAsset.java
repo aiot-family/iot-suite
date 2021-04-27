@@ -28,5 +28,10 @@ public class AuthorizedAsset implements Serializable {
      */
     private String assetName;
 
+    /**
+     * 层级号
+     */
+    private Integer level;
+
 
 }

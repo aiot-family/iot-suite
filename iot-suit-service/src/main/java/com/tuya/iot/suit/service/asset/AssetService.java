@@ -48,6 +48,8 @@ public interface AssetService {
 
     List<AssetDTO> getAssetByName(String assetName, String userId);
 
+    List<AssetDTO> getAssetByNameV2(String assetName, String userId);
+
     /**
      * 根据资产ID获取子资产列表
      *
@@ -58,7 +60,13 @@ public interface AssetService {
 
     AssetDTO getTreeBy(String assetId, String userId);
 
+    AssetDTO getTreeByV2(String assetId, String userId);
+
+    AssetDTO getTreeWithoutDevice(String assetId, String userId);
+
     List<DeviceDTO> getChildDeviceInfoBy(String assetId);
 
     PageDataVO<DeviceDTO> getChildDeviceInfoPage(String assetId, Integer pageNo, Integer pageSize);
+
+    void refreshTree();
 }

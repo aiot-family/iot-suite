@@ -1,7 +1,8 @@
 package com.tuya.iot.suit.service.asset.impl;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.Lists;
-
 import com.tuya.iot.openapi.model.PageResult;
 import com.tuya.iot.suit.ability.asset.ability.AssetAbility;
 import com.tuya.iot.suit.ability.asset.model.*;
@@ -15,15 +16,15 @@ import com.tuya.iot.suit.service.dto.AssetDTO;
 import com.tuya.iot.suit.service.dto.DeviceDTO;
 import com.tuya.iot.suit.service.model.PageDataVO;
 import lombok.extern.slf4j.Slf4j;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
+import org.apache.pulsar.shade.org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
+import org.springframework.util.StopWatch;
 
 import javax.annotation.Resource;
 import java.time.Duration;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.tuya.iot.suit.core.constant.ErrorCode.USER_NOT_AUTH;
@@ -70,7 +71,7 @@ public class AssetServiceImpl implements AssetService {
         request.setParent_asset_id(parentAssetId);
         String assetId = assetAbility.addAsset(request);
         authorizedAssetWithoutToChildren(assetId, userId);
-        addAssetToCache(assetId, request);
+        // addAssetToCache(assetId, request, false);
         return new Response(assetId);
     }
 
@@ -98,7 +99,7 @@ public class AssetServiceImpl implements AssetService {
         AssetModifyRequest request = new AssetModifyRequest();
         request.setName(assetName);
         Boolean aBoolean = assetAbility.modifyAsset(assetId, request);
-        updateAssetToCache(assetId, assetName);
+        // updateAssetToCache(assetId, assetName);
         return new Response(aBoolean);
     }
 
@@ -115,8 +116,7 @@ public class AssetServiceImpl implements AssetService {
     public Response deleteAsset(String userId, String assetId) {
         checkAssetAuthOfUser(assetId, userId);
         Boolean aBoolean = assetAbility.deleteAsset(assetId);
-        deleteAssetFromCache(assetId);
-        ASSET_CACHE.refresh("-1");
+        // deleteAssetFromCache(assetId);
         return new Response(aBoolean);
     }
 
@@ -146,16 +146,31 @@ public class AssetServiceImpl implements AssetService {
      * @param assetId
      * @param request
      */
-    private void addAssetToCache(String assetId, AssetAddRequest request) {
+    private boolean addAssetToCache(String assetId, AssetAddRequest request, boolean refreshDevice) {
         AssetDTO assetDTO = searchFromCache(checkTopAsset(request.getParent_asset_id()));
-        AssetDTO son = new AssetDTO();
+        //判断父级节点是否能找到，找不到则未添加成功
+        if (!request.getParent_asset_id().equals(assetDTO.getAsset_id())) {
+            return false;
+        }
+        AssetDTO son = searchFromCache(assetId);
+        //tree中已经包含了该节点，不做其他处理 了
+        if (assetId.equals(son.getAsset_id())) {
+            return true;
+        }
+        son = new AssetDTO();
         son.setAsset_id(assetId);
         son.setChild_asset_count(0);
         son.setAsset_name(request.getName());
         son.setParent_asset_id(request.getParent_asset_id());
-        son.setChild_device_count(0);
-        son.setAsset_full_name(request.getName());
+        if (refreshDevice) {
+            int childDeviceCount = getChildDeviceIdsBy(assetId).size();
+            son.setChild_device_count(childDeviceCount);
+        } else {
+            son.setChild_device_count(0);
+        }
+        son.setAsset_full_name(assetDTO.getAsset_full_name() + request.getName());
         son.setSubAssets(new ArrayList<>());
+        son.setLevel(assetDTO.getLevel() + 1);
         List<AssetDTO> subAssets = assetDTO.getSubAssets();
         if (subAssets == null) {
             subAssets = new ArrayList<>();
@@ -163,7 +178,7 @@ public class AssetServiceImpl implements AssetService {
         subAssets.add(son);
         assetDTO.setSubAssets(subAssets);
         assetDTO.setChild_asset_count(subAssets.size());
-        ASSET_CACHE.refresh("-1");
+        return true;
     }
 
     /**
@@ -276,6 +291,26 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
+    public List<AssetDTO> getAssetByNameV2(String assetName, String userId) {
+        List<AuthorizedAsset> authorizedAssets = listAuthorizedAssets(userId);
+        if (CollectionUtils.isEmpty(authorizedAssets)) {
+            return new ArrayList<>();
+        }
+        Set<String> authedAssets = authorizedAssets.stream().map(AuthorizedAsset::getAssetId).collect(Collectors.toSet());
+        List<Asset> assets = assetAbility.selectAssets(String.join(",", authedAssets));
+        return assets.stream()
+                .filter(asset -> asset.getAsset_name().contains(assetName))
+                .sorted(Comparator.comparingInt(Asset::getLevel))
+                .map(asset -> AssetDTO.builder()
+                        .asset_id(asset.getAsset_id())
+                        .asset_name(asset.getAsset_name())
+                        .parent_asset_id(asset.getParent_asset_id())
+                        .asset_full_name(asset.getAsset_full_name())
+                        .level(asset.getLevel())
+                        .build()).collect(Collectors.toList());
+    }
+
+    @Override
     public List<AssetDTO> getChildAssetListBy(String assetId) {
         List<AssetDTO> result = AssetConvertor.$.toAssetDTOList(getChildAssetsBy(assetId));
         setAssetChildInfo(result);
@@ -289,6 +324,188 @@ public class AssetServiceImpl implements AssetService {
         return filterAuthorizedTree(originalTree, userId);
     }
 
+    @Override
+    public AssetDTO getTreeByV2(String assetId, String userId) {
+        List<AuthorizedAsset> authorizedAssets = listAuthorizedAssets(userId);
+        return buildAuthedAssetTree(authorizedAssets, assetId, true);
+    }
+
+    @Override
+    public AssetDTO getTreeWithoutDevice(String assetId, String userId) {
+        List<AuthorizedAsset> authorizedAssets = listAuthorizedAssets(userId);
+        return buildAuthedAssetTree(authorizedAssets, assetId, false);
+    }
+
+    private List<AuthorizedAsset> listAuthorizedAssets(String userId) {
+        log.info("查询用户userId[{}]授权的资产IDs", userId);
+        List<AuthorizedAsset> authorizedAssets = new ArrayList<>();
+
+        boolean hasMore = true;
+        int pageNo = PAGE_NO;
+        while (hasMore) {
+            PageResultWithTotal<AuthorizedAsset> pageResult = assetAbility.pageListAuthorizedAssets(userId, pageNo, PAGE_SIZE);
+            hasMore = pageResult.getHasMore().booleanValue();
+            List<AuthorizedAsset> authorizedAsset = pageResult.getList();
+            authorizedAssets.addAll(authorizedAsset);
+            pageNo++;
+        }
+        return authorizedAssets;
+    }
+
+
+    /**
+     * 批量查询资产
+     *
+     * @param assetIds
+     * @return
+     */
+    private List<Asset> listAsset(Set<String> assetIds) {
+        if (CollectionUtils.isEmpty(assetIds)) {
+            return new ArrayList<>();
+        }
+        return assetAbility.selectAssets(String.join(",", assetIds));
+        // List<Asset> list = new ArrayList<>();
+        // StringBuilder assetIdParam = new StringBuilder();
+        // int i = 0;
+        // for (String assetId : assetIds) {
+        //     i++;
+        //     assetIdParam.append(",").append(assetId);
+        //     if (i % 20 == 0) {
+        //         PageResult<Asset> pageResult = assetAbility.selectAssets(assetIdParam.toString(), "", "", 20);
+        //         if (!CollectionUtils.isEmpty(pageResult.getList())) {
+        //             list.addAll(pageResult.getList());
+        //         }
+        //         assetIdParam = new StringBuilder();
+        //     }
+        // }
+        // return list;
+    }
+
+    /**
+     * 构建授权的资产树
+     *
+     * @param list
+     * @return
+     */
+    private AssetDTO buildAuthedAssetTree(List<AuthorizedAsset> list, String targetAssetId, boolean deviceFlag) {
+        if (CollectionUtils.isEmpty(list)) {
+            return null;
+        }
+        List<AssetDTO> assetList = list.stream().map(authedAsset -> AssetDTO.builder()
+                .asset_id(authedAsset.getAssetId())
+                .parent_asset_id(authedAsset.getParentAssetId())
+                .level(authedAsset.getLevel())
+                .asset_name(authedAsset.getAssetName())
+                .asset_full_name(authedAsset.getAssetName())
+                .subAssets(new ArrayList<>())
+                .build()).collect(Collectors.toList());
+
+        // 便于设置资产下设备数量
+        Map<String, AssetDTO> assetMap = assetList.stream().collect(Collectors.toMap(
+                AssetDTO::getAsset_id, Function.identity()
+        ));
+
+        // 从底层向上补全资产树
+        Map<Integer, List<AssetDTO>> levelMap = assetList.stream().collect(Collectors.groupingBy(AssetDTO::getLevel)); // TODO 是否包含-1
+        int targetLevel = "-1".equals(targetAssetId) ? 0 : assetMap.get(targetAssetId).getLevel() + 1;
+        for (int i = 4; i > targetLevel; i--) {
+            List<AssetDTO> assetDTOS = levelMap.get(i);
+            if (CollectionUtils.isEmpty(assetDTOS)) {
+                continue;
+            }
+            Set<String> pids = assetDTOS.stream()
+                    .map(AssetDTO::getParent_asset_id)
+                    .filter(pAssetId -> !assetMap.containsKey(pAssetId))
+                    .collect(Collectors.toSet());
+            List<Asset> pAssetList = listAsset(pids);
+            if (!CollectionUtils.isEmpty(pAssetList)) {
+                levelMap.compute(
+                        i - 1,
+                        (level, assetDTOList) -> {
+                            if (Objects.isNull(assetDTOList)) {
+                                assetDTOList = new ArrayList<>();
+                            }
+                            assetDTOList.addAll(pAssetList.stream().map(
+                                    asset -> AssetDTO.builder()
+                                            .asset_id(asset.getAsset_id())
+                                            .parent_asset_id(asset.getParent_asset_id())
+                                            .level(asset.getLevel())
+                                            .asset_name(asset.getAsset_name())
+                                            .asset_full_name(asset.getAsset_name())
+                                            .subAssets(new ArrayList<>())
+                                            .build()
+                            ).collect(Collectors.toList()));
+                            return assetDTOList;
+                        }
+                );
+            }
+        }
+
+        // 自底向上构建资产树
+        Map<String, AssetDTO> treeMap = levelMap.values().stream().flatMap(Collection::stream).collect(Collectors.toMap(
+                AssetDTO::getAsset_id, Function.identity()
+        ));
+        for (int i = 4; i > targetLevel; i--) {
+            List<AssetDTO> curLevelAssets = levelMap.get(i);
+            if (CollectionUtils.isEmpty(curLevelAssets)) {
+                continue;
+            }
+            for (AssetDTO curLevelAsset : curLevelAssets) {
+                AssetDTO pAssetDTO = treeMap.get(curLevelAsset.getParent_asset_id());
+                List<AssetDTO> subAssets = pAssetDTO.getSubAssets();
+                if (Objects.isNull(subAssets)) {
+                    subAssets = new ArrayList<>();
+                    pAssetDTO.setSubAssets(subAssets);
+                }
+                subAssets.add(curLevelAsset);
+                pAssetDTO.setChild_asset_count(pAssetDTO.getChild_asset_count() + 1);
+            }
+        }
+
+        // 自底向上构建资产树设备信息
+        AssetDTO targetAsset;
+        if ("-1".equals(targetAssetId)) {
+            targetAsset =
+                    AssetDTO.builder().asset_id(targetAssetId).subAssets(levelMap.get(0)).child_asset_count(levelMap.get(0).size()).build();
+        } else {
+            targetAsset = treeMap.get(targetAssetId);
+        }
+        if (deviceFlag) {
+            Set<String> targetAuthedAssets = new HashSet<>();
+            authedAssetIds(targetAsset, assetMap.keySet(), targetAuthedAssets);
+
+            // 查询授权的资产下的设备信息
+            targetAuthedAssets.parallelStream().forEach(
+                    assetId -> {
+                        List<String> deviceIds = getChildDeviceIdsBy(assetId);
+                        assetMap.get(assetId).setChild_device_count(CollectionUtils.isEmpty(deviceIds) ? 0 : deviceIds.size());
+                    }
+            );
+        }
+        return targetAsset;
+    }
+
+    /**
+     * 查询指定资产树下的授权资产Id集合
+     *
+     * @param curAsset
+     * @param totalAuthedAssets
+     * @param curAuthedAssets
+     */
+    private void authedAssetIds(AssetDTO curAsset, Set<String> totalAuthedAssets, Set<String> curAuthedAssets) {
+        if (totalAuthedAssets.contains(curAsset.getAsset_id())) {
+            curAuthedAssets.add(curAsset.getAsset_id());
+        }
+
+        List<AssetDTO> subAssets = curAsset.getSubAssets();
+        if (!CollectionUtils.isEmpty(subAssets)) {
+            for (AssetDTO subAsset : subAssets) {
+                authedAssetIds(subAsset, totalAuthedAssets, curAuthedAssets);
+            }
+        }
+    }
+
+
     /**
      * 根据用户过滤资产树
      *
@@ -298,7 +515,13 @@ public class AssetServiceImpl implements AssetService {
      */
     private AssetDTO filterAuthorizedTree(AssetDTO originalTree, String userId) {
         List<String> authorizedAssetIds = listAuthorizedAssetIds(userId);
-        return removeNonAuthorizeNode(SimpleConvertUtil.convert(originalTree, AssetDTO.class), authorizedAssetIds);
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+        AssetDTO assetDTO = removeNonAuthorizeNode(SimpleConvertUtil.convert(originalTree, AssetDTO.class), authorizedAssetIds);
+        stopWatch.stop();
+        long totalTimeMillis = stopWatch.getTotalTimeMillis();
+        log.info("take [{}] ms for removing non-authorized assets", totalTimeMillis);
+        return assetDTO;
     }
 
 
@@ -395,16 +618,51 @@ public class AssetServiceImpl implements AssetService {
         if (CollectionUtils.isEmpty(fullCollection)) {
             return new AssetDTO();
         }
-        Collection<String> tempColl = new HashSet<>();
+        List<String> tempColl = new ArrayList<>();
         tempColl.addAll(fullCollection);
         if (checkAssetMarked(dto, tempColl)) {
             if (!CollectionUtils.isEmpty(tempColl)) {
-                ASSET_CACHE.refresh("-1");
+                batchAddAssetToCache(tempColl);
                 return removeNonAuthorizeNode(SimpleConvertUtil.convert(ASSET_CACHE.get("-1"), AssetDTO.class), fullCollection);
             }
             return dto;
         }
         return new AssetDTO();
+    }
+
+    private void batchAddAssetToCache(List<String> tempColl) {
+        List<Asset> assets = new ArrayList<>();
+        int start = 0;
+        int end = start + 20;
+        String assetIds;
+        while (start <= tempColl.size()) {
+            if (end > tempColl.size()) {
+                end = tempColl.size();
+            }
+            assetIds = StringUtils.join(tempColl.subList(start, end), ",");
+            PageResult<Asset> pageResult = assetAbility.selectAssets(assetIds, "", "", 20);
+            if (!CollectionUtils.isEmpty(pageResult.getList())) {
+                assets.addAll(pageResult.getList());
+            }
+            start = end + 1;
+            end = start + 20;
+        }
+        start = 0;
+        end = assets.size();
+        while (assets.size() > 0) {
+            for (int i = assets.size() - 1; i >= 0; i--) {
+                Asset asset = assets.get(i);
+                AssetAddRequest request = new AssetAddRequest();
+                request.setName(asset.getAsset_name());
+                request.setParent_asset_id(asset.getParent_asset_id());
+                if (addAssetToCache(asset.getAsset_id(), request, true)) {
+                    assets.remove(i);
+                }
+            }
+            if (start++ >= end) {
+                break;
+            }
+        }
     }
 
     /**
@@ -451,5 +709,17 @@ public class AssetServiceImpl implements AssetService {
         return subAssets.size() > 0;
     }
 
+    /**
+     * refresh asset tree
+     */
+    @Override
+    public void refreshTree() {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+        ASSET_CACHE.get("-1");
+        stopWatch.stop();
+        long totalTimeMillis = stopWatch.getTotalTimeMillis();
+        log.info("take [{}] ms for refreshing asset tress", totalTimeMillis);
+    }
 
 }

@@ -39,4 +39,8 @@ public class Asset implements Serializable {
      * 设备ID
      */
     private String device_id;
+    /**
+     * 层级号
+     */
+    private Integer level;
 }

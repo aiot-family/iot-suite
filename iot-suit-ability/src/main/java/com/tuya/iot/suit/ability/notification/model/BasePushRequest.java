@@ -1,6 +1,7 @@
 package com.tuya.iot.suit.ability.notification.model;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 
@@ -9,7 +10,8 @@ import java.io.Serializable;
  * @auther: Medivh.chen@tuya.com
  * @date: 2021/04/14
  **/
-@Data
+@Setter
+@Getter
 public class BasePushRequest implements Serializable {
 
     private static final long serialVersionUID = 3142886369056427304L;
