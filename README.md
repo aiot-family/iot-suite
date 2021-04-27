@@ -1,30 +1,30 @@
-# 管控台
-## 统一管理平台环境信息
-## 目标
-实践云端行业能力，验证SaaS开发框架功能，沉淀能力丰富、灵活可扩展的IoT统一管控台。
-## 研发体系
-基于SaaS开发框架的云云对接研发体系
-![img.png](images/研发体系.png)
+# 统一管理平台
+## 介绍
+统一管理平台是实现云端行业能力，能灵活集成、扩展IoT的统一管控台应用。该统一管理平台与云开发平台项目的projectCode做关联，需要使用projectCode对应的用户信息登录，主要包括以下内容：
+账号管理：修改密码、重置密码
+资产管理：创建资产、修改资产、删除资产等
+设备管理：增加设备、移除设备、编辑设备、控制设备等
+## 启动项目
+1. 将项目代码导入到IDE，在./iot-suit-starter/src/main/resources/application.properties文件中配置云开发平台应用的账号
+   //在云开发平台申请的Access ID/Client ID
+   connector.ak=
+   //在云开发平台申请的Access Secret/Client Secret
+   connector.sk=
+   //在云开发平台申请的Project Code
+   project.code=
 
-## 迭代
-| 版本   |  时间节点 | 能力   | 相关文档  |  问题 |
-| ------------ | ------------ | ------------ | ------------ | ------------ |
-|  V1 |  需求评审 - 4.7 UI评审 - 4.13 技术评审 - 4.16 测试用例评审 - 4.19 联调时间 - 4.16 提测时间 - 4.21 上线时间 - 4.27 |  资产、用户、设备 | [PRD](https://wiki.tuya-inc.com:7799/pages/viewpage.action?pageId=89527987" "PRD") 、[原型](https://ux.tuya-inc.com:7799/app/c4Ik7xs8E1Q/specs/ABzVQuUIj1p/HxVImhfuGWIx " "原型") （账号：pd02@tuya.com ，密码：Tuya.20210318）、 |  云端 资产&用户授权体系需要详细规划，涉及到子资产的授权机制 |
+2. 以Spring Boot Starter 方式启动项目，执行main方法，或者用Maven
+   $ ./mvn package
+   $ java -jar iot-app-smart-office-starter/target/*.jar
 
-## 主要技术设计
-### 项目结构
-![img.png](images/项目结构.png)
-### 用例
-![img.png](images/用例.png)
 
-### 交互
-![img.png](images/用户登录时序图.png)
+## 项目更多说明
+需获取更多文档，请查看以下链接
+项目PRD文档[https://wiki.tuya-inc.com:7799/page/89527987](https://wiki.tuya-inc.com:7799/page/89527987 "https://wiki.tuya-inc.com:7799/page/89527987")
+接口文档[https://wiki.tuya-inc.com:7799/page/85629879](https://wiki.tuya-inc.com:7799/page/85629879 "https://wiki.tuya-inc.com:7799/page/85629879")
 
-逻辑描述：
-
-用户输入用户及密码，点击登录按钮。
-前端对密码进行加密，并将登录信息发送给后端服务。
-用户服务实现类调用用户连接器的登录方法。
-用户连接器封装接口（/v1.0/iot-03/users/login）的请求数据并调用该接口。
-IoT SaaS Framework将用户连接器的请求转发到云端并返回登录的相关信息（用户名、access_token、过期时间）。
+### 如何获得技术支持
+可以通过以下链接获得帮助
+涂鸦智能帮助中心:[https://support.tuya.com/en/help](https://support.tuya.com/en/help "https://support.tuya.com/en/help")
+涂鸦智能全球化智能平台:[https://service.console.tuya.com ](https://service.console.tuya.com  "https://service.console.tuya.com ")
 
