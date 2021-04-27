@@ -70,7 +70,10 @@ public class RedisSessionRepository implements SessionRepository<RedisSession> {
     public void delete(String id) {
         String key = prefix + id;
         log.debug("delete " + key);
+        RedisSession session = (RedisSession)redisTemplate.opsForValue().get(key);
+        UserToken token = session.getAttribute("token");
         redisTemplate.delete(key);
+        redisTemplate.delete(token.getUserId());
     }
 
     public void setDefaultMaxInactiveInterval(Integer defaultMaxInactiveInterval) {

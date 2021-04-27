@@ -60,7 +60,6 @@ public class UserController {
             }
             username = criteria.getTelephone();
         }
-        //password = Sha256Util.encryption(password);
         String userId = userService.login(username, password).getUid();
         UserToken userToken = new UserToken(userId, username, session.getId(), 1);
         session.setAttribute("token", userToken);
@@ -91,9 +90,7 @@ public class UserController {
         UserToken userToken = (UserToken) session.getAttribute("token");
         String userName = criteria.getUser_name();
         String currentPassword = criteria.getCurrent_password();
-        //currentPassword = Sha256Util.encryption(currentPassword);
         String newPassword = criteria.getNew_password();
-        //newPassword = Sha256Util.encryption(newPassword);
         if (!userName.equals(userToken.getNickName())) {
             return Response.buildFailure(USER_NOT_EXIST);
         }
