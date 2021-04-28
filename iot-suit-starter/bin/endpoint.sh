@@ -2,18 +2,17 @@
 
 CURRENT_DIR=`dirname $0`
 API_HOME=`cd "$CURRENT_DIR/.." >/dev/null; pwd`
-run_jar="iot-suit-starter-1.0.0.jar"
-cd $API_HOME
-Jar="$API_HOME/lib/${run_jar}"
+Jar=`ls $API_HOME/lib/*.jar`
 RETVAL="0"
 LOG="api_stdout.log"
 
+# run redis
 nohup /usr/bin/redis-server /etc/redis.conf &
+# run nginx
 cd /usr/bin
-#chmod 777 /usr/bin/nginx
 nginx
+# run java application
 cd $API_HOME
-
 java \
 -Dconnector.ak=$1 \
 -Dconnector.sk=$2 \

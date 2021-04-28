@@ -31,8 +31,6 @@ RUN \
   ln -s /usr/lib/jvm/java-1.8-openjdk /usr/local/java && \
   echo ""
 
-
-
 ################## 安装nginx #####################
 RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
     && CONFIG="\
@@ -185,7 +183,6 @@ STOPSIGNAL SIGTERM
 WORKDIR ${target_path}/bin/
 
 EXPOSE 80
-EXPOSE 8080
 STOPSIGNAL SIGTERM
 
 CMD bash -C endpoint.sh ${AK} ${SK} ${PC}

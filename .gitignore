@@ -20,6 +20,7 @@ $RECYCLE.BIN/
 *.iws
 *.iml
 *.ipr
+*target
 
 # Windows Installer files
 *.cab
