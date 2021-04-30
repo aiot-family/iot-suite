@@ -17,12 +17,6 @@
    $ ./mvn package
    $ java -jar iot-app-smart-office-starter/target/*.jar
 
-
-## 项目更多说明
-需获取更多文档，请查看以下链接
-项目PRD文档[https://wiki.tuya-inc.com:7799/page/89527987](https://wiki.tuya-inc.com:7799/page/89527987 "https://wiki.tuya-inc.com:7799/page/89527987")
-接口文档[https://wiki.tuya-inc.com:7799/page/85629879](https://wiki.tuya-inc.com:7799/page/85629879 "https://wiki.tuya-inc.com:7799/page/85629879")
-
 ### 如何获得技术支持
 可以通过以下链接获得帮助
 涂鸦智能帮助中心:[https://support.tuya.com/en/help](https://support.tuya.com/en/help "https://support.tuya.com/en/help")
