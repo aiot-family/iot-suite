@@ -4,23 +4,16 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <!--<parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.5.8.RELEASE</version>
-        <relativePath/>
-    </parent>-->
-
     <groupId>com.tuya</groupId>
-    <artifactId>iot-suit</artifactId>
-    <version>${iot.suit.version}</version>
+    <artifactId>iot-suite</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <iot.suit.version>1.0.0-SNAPSHOT</iot.suit.version>
+        <iot.suite.version>1.0.0-SNAPSHOT</iot.suite.version>
         <spring-boot.version>1.5.8.RELEASE</spring-boot.version>
         <tuya.spring.boot.starter.version>1.0.1-R</tuya.spring.boot.starter.version>
         <mapstruct.version>1.4.1.Final</mapstruct.version>
@@ -31,11 +24,11 @@
     </properties>
 
     <modules>
-        <module>iot-suit-core</module>
-        <module>iot-suit-ability</module>
-        <module>iot-suit-service</module>
-        <module>iot-suit-web</module>
-        <module>iot-suit-starter</module>
+        <module>iot-suite-core</module>
+        <module>iot-suite-ability</module>
+        <module>iot-suite-service</module>
+        <module>iot-suite-web</module>
+        <module>iot-suite-starter</module>
     </modules>
 
     <dependencyManagement>
@@ -50,26 +43,26 @@
 
             <dependency>
                 <groupId>com.tuya</groupId>
-                <artifactId>iot-suit-core</artifactId>
-                <version>${iot.suit.version}</version>
+                <artifactId>iot-suite-core</artifactId>
+                <version>${iot.suite.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.tuya</groupId>
-                <artifactId>iot-suit-ability</artifactId>
-                <version>${iot.suit.version}</version>
+                <artifactId>iot-suite-ability</artifactId>
+                <version>${iot.suite.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.tuya</groupId>
-                <artifactId>iot-suit-service</artifactId>
-                <version>${iot.suit.version}</version>
+                <artifactId>iot-suite-service</artifactId>
+                <version>${iot.suite.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.tuya</groupId>
-                <artifactId>iot-suit-web</artifactId>
-                <version>${iot.suit.version}</version>
+                <artifactId>iot-suite-web</artifactId>
+                <version>${iot.suite.version}</version>
             </dependency>
 
             <dependency>
@@ -219,7 +212,4 @@
             </plugins>
         </pluginManagement>
     </build>
-
-
-
 </project>

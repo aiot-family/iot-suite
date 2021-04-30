@@ -5,17 +5,17 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>iot-suit</artifactId>
+        <artifactId>iot-suite</artifactId>
         <groupId>com.tuya</groupId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>iot-suit-web</artifactId>
+    <artifactId>iot-suite-web</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>com.tuya</groupId>
-            <artifactId>iot-suit-service</artifactId>
+            <artifactId>iot-suite-service</artifactId>
         </dependency>
 
         <dependency>

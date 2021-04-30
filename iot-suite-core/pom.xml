@@ -6,12 +6,12 @@
 
     <parent>
         <groupId>com.tuya</groupId>
-        <artifactId>iot-suit</artifactId>
+        <artifactId>iot-suite</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>iot-suit-core</artifactId>
-    <version>${iot.suit.version}</version>
+    <artifactId>iot-suite-core</artifactId>
+    <version>${iot.suite.version}</version>
 
     <dependencies>
         <dependency>
