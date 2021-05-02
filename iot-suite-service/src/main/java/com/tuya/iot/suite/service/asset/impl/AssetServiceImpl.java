@@ -94,7 +94,8 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public Response updateAsset(String userId, String assetId, String assetName) {
+    public Response
+    updateAsset(String userId, String assetId, String assetName) {
         checkAssetAuthOfUser(assetId, userId);
         AssetModifyRequest request = new AssetModifyRequest();
         request.setName(assetName);
