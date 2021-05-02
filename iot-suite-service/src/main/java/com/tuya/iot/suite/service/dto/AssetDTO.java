@@ -42,12 +42,12 @@ public class AssetDTO {
     /**
      * 子资产数量
      */
-    private Integer child_asset_count;
+    private int child_asset_count;
 
     /**
      * 子设备数量
      */
-    private Integer child_device_count;
+    private int child_device_count;
 
     /**
      * 层级号
