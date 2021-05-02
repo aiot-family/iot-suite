@@ -74,7 +74,7 @@ public class AssetController {
     @GetMapping(value = "/tree/{asset_id}")
     Response getTreeBy(@PathVariable("asset_id") String assetId) {
         String userId = getUserId(session);
-        return new Response(AssetConvertor.$.toAssetVO(assetService.getTreeBy(assetId, userId)));
+        return new Response(AssetConvertor.$.toAssetVO(assetService.getTreeByV2(assetId, userId)));
     }
 
     @ApiOperation(value = "通过资产名称获取资产列表")
@@ -84,7 +84,7 @@ public class AssetController {
     @GetMapping
     Response getAssetByName(@RequestParam("asset_name") String assetName) {
         String userId = getUserId(session);
-        return new Response(AssetConvertor.$.toAssetVOList(assetService.getAssetByName(assetName, userId)));
+        return new Response(AssetConvertor.$.toAssetVOList(assetService.getAssetByNameV2(assetName, userId)));
     }
 
     @ApiOperation(value = "通过资产ID获取子资产")
